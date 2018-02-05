@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const expressJWT = require('express-jwt');
 
 const sessionRouteHandler = require('./routes/session');
+const groupRouteHandler = require('./routes/group');
 
 const port = process.env.PORT || 3000;
 
@@ -18,6 +19,12 @@ app.use(expressJWT({
   path: ['/api/auth/sessions']
 }));
 app.use('/api/auth/sessions', sessionRouteHandler);
+app.use('/api/firebase/groups', groupRouteHandler);
+app.use(function clientErrorHandler(err, req, res, next) {
+  res.status(500).send({
+    error: err
+  });
+})
 
 
 app.listen(port, () => console.log('App listening on port 3000!'));
