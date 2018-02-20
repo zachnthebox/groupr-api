@@ -7,6 +7,8 @@ const expressJWT = require('express-jwt');
 const mongoose = require('mongoose');
 const API = require('json-api');
 
+const Facebook = require('./facebook');
+const Calendar = require('./calendar');
 const sessionRouteHandler = require('./routes/session');
 
 const uristring = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/groupr';
@@ -20,7 +22,7 @@ const models = {
 function remove(array, element) {
   const index = array.map(item => item.toJSON()).indexOf(element.id);
   if (index !== -1) {
-      array.splice(index, 1);
+    array.splice(index, 1);
   }
 }
 
@@ -153,11 +155,102 @@ app.post("/api/:type(groups|locations)", requestHandler);
 app.patch("/api/:type(groups|locations)/:id", requestHandler);
 app.delete("/api/:type(groups|locations)/:id", requestHandler);
 
+app.post('/api/groups/:id/actions/skip-location', function (req, res) {
+  const groupId = req.params.id;
+  return models.Group.findById(groupId).then(group => {
+    return skipLocation(group);
+  }).then(() => {
+    res.sendStatus(204);
+  }, () => {
+    res.sendStatus(500);
+  }); 
+});
+
+app.post('/api/groups/:id/actions/skip-date', function (req, res) {
+  const groupId = req.params.id;
+  return models.Group.findById(groupId).then(group => {
+    return skipDate(group);
+  }).then(() => {
+    res.sendStatus(204);
+  }, () => {
+    res.sendStatus(500);
+  });
+});
+
+app.post('/api/groups/:id/actions/post', function (req, res) {
+  const groupId = req.params.id;
+  return models.Group.findById(groupId).then(group => {
+    return updateCalendarCalendarAndPostToFacebook(group);
+  }).then(() => {
+    res.sendStatus(204);
+  }, () => {
+    res.sendStatus(500);
+  });
+});
+
+function skipDate(group) {
+  const date = moment(group.nextDate).add(1, 'week').toDate();
+  group.nextDate = date;
+  return group.save();
+}
+
+function updateCalendarCalendarAndPostToFacebook(group) {
+  return upsertCalendarEvent(group).then(() => {
+    return postToFacebookGroup(group);
+  });
+}
+
+function getNextLocationString(group) {
+  const locationId = group.nextLocation && group.nextLocation.toJSON();
+  return models.Location.findById(locationId).then(location => {
+    if (!location) {
+      throw 'location not found';
+    }
+    const formattedLocation = `${location.address}, ${location.city}, ${location.state} ${location.zipCode}`;
+    return {
+      location,
+      formattedLocation,
+    };
+  });
+}
+
+function postToFacebookGroup(group) {
+  const formattedDate = moment(group.nextDate).format('LLL')
+  return getNextLocationString(group).then(hash => {
+    const message = `Where is group next?\n\n${hash.location.name}`;
+    const link = `https://www.google.com/maps/place/${encodeURIComponent(hash.formattedLocation)}`;
+    Facebook.postToGroup(message, link);
+  });
+}
+
+function upsertCalendarEvent(group) {
+  return Calendar.getGroupEvent(group.nextDate).then(event => {
+    return getNextLocationString(group).then(hash => {
+      const needsToCreateEvent = !event;
+      event = event || {};
+      event.summary = `Group @ ${hash.location.name}`;
+      event.location = hash.formattedLocation;
+      event.start = {
+        dateTime: moment(group.nextDate).format(),
+        timeZone: 'America/New_York',
+      };
+      event.end = {
+        dateTime: moment(group.nextDate).add(2, 'hours').format(),
+        timeZone: 'America/New_York',
+      };
+      if (needsToCreateEvent) {
+        return Calendar.createGroupEvent(event);
+      }
+      return Calendar.updateGroupEvent(event.id, event);
+    });
+  });
+}
+
 app.use(function clientErrorHandler(err, req, res, next) {
   res.status(500).send({
     error: err
   });
-})
+});
 
 
 app.listen(port, () => console.log('App listening on port 3000!'));
