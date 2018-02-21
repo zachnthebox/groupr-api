@@ -18,7 +18,7 @@
         "facebook_access_token": {
             "description": "The Facebook Access Token with group permissions"
         },
-        "port": {
+        "PORT": {
             "description": "The port used to expose the express server"
         },
         "jwt_secret": {
