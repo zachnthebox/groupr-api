@@ -136,7 +136,7 @@ const APIController = new API.controllers.API(registry);
 const Front = new API.httpStrategies.Express(APIController, DocsController);
 const requestHandler = Front.apiRequest.bind(Front);
 
-const port = process.env.port || 3000;
+const port = process.env.PORT || 3000;
 
 const app = express();
 
