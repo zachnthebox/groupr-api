@@ -11,7 +11,7 @@ const Facebook = require('./facebook');
 const Calendar = require('./calendar');
 const sessionRouteHandler = require('./routes/session');
 
-const uristring = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/groupr';
+const uristring = process.env.MONGOLAB_URI || process.env.MONGODB_URI || 'mongodb://localhost/groupr';
 mongoose.connect(uristring);
 
 const models = {
