@@ -247,9 +247,13 @@ function upsertCalendarEvent(group) {
 }
 
 app.use(function clientErrorHandler(err, req, res, next) {
-  res.status(500).send({
-    error: err
-  });
+  if (err.constructor.name === 'UnauthorizedError') {
+    res.sendStatus(401);
+  } else {
+    res.status(500).send({
+      error: err
+    });
+  }
 });
 
 
