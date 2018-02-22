@@ -1,5 +1,5 @@
 const express = require('express');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const RSVP = require('rsvp');
 const request = require('request');
 const bodyParser = require('body-parser');
@@ -10,6 +10,8 @@ const API = require('json-api');
 const Facebook = require('./facebook');
 const Calendar = require('./calendar');
 const sessionRouteHandler = require('./routes/session');
+
+moment.tz.setDefault("America/New_York");
 
 const uristring = process.env.MONGOLAB_URI || process.env.MONGODB_URI || 'mongodb://localhost/groupr';
 mongoose.connect(uristring);
