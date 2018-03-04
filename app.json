@@ -26,6 +26,12 @@
         },
         "firebase_api_key": {
             "description": "The Firebase api key used for auth"
+        },
+        "groupr_api_auth_token": {
+            "description": "The auth token to communicate with the api"
+        },
+        "groupr_api_url": {
+            "description": "The hosted api url"
         }
     },
     "addons": [
