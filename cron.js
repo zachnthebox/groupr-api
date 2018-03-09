@@ -67,9 +67,19 @@ getGroups().then(response => {
     const is4DaysBeforeNextGroup = moment().endOf('day').isSame(moment(attributes.nextDate).subtract(4, 'day').endOf('day'))
 
     if (isDayAfterGroup) {
-      updateNextDate(groupId).then(() => updateNextLocation(groupId));
+      console.log('It is the day after group. Updating the next group date and next location');
+      console.log(`Group ${groupId}`);
+      updateNextDate(groupId).then(() => {
+        updateNextLocation(groupId)
+      }, error => {
+        console.log(error);
+      });
     } else if (is4DaysBeforeNextGroup) {
-      postGroupLocation(groupId);
+      console.log('Now posting next group location to social media channels');
+      console.log(`Group ${groupId}`);
+      postGroupLocation(groupId).catch(error => {
+        console.log(error);
+      });
     }
   });
 });
