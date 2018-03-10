@@ -9,18 +9,23 @@ const groupr_api_url = process.env.groupr_api_url;
 
 const makeRequest = options => {
   return new RSVP.Promise(function (resolve, reject) {
+    console.log(`requesting url - ${options.uri}`);
     request(options, function (error, response, body) {
-      if (!error && response.statusCode == 200) {
+      if (!error) {
+        console.log('successful response', body);
         resolve(body);
+        return;
       }
+      console.log('error response', body);
       reject(body);
     });
   });
 };
 
 const getGroups = () => {
+  const uri = `${groupr_api_url}/groups`;
   return makeRequest({
-    uri: `${groupr_api_url}/groups`,
+    uri,
     method: 'GET',
     auth: {
       bearer: groupr_api_auth_token,
@@ -29,8 +34,9 @@ const getGroups = () => {
 };
 
 const updateNextDate = groupId => {
+  const uri = `${groupr_api_url}/groups/${groupId}/actions/skip-date`;
   return makeRequest({
-    uri: `${groupr_api_url}/groups/${groupId}/actions/skip-date`,
+    uri,
     method: 'POST',
     auth: {
       bearer: groupr_api_auth_token,
@@ -39,8 +45,9 @@ const updateNextDate = groupId => {
 };
 
 const updateNextLocation = groupId => {
+  const uri = `${groupr_api_url}/groups/${groupId}/actions/skip-location`
   return makeRequest({
-    uri: `${groupr_api_url}/groups/${groupId}/actions/skip-location`,
+    uri,
     method: 'POST',
     auth: {
       bearer: groupr_api_auth_token,
@@ -49,8 +56,9 @@ const updateNextLocation = groupId => {
 };
 
 const postGroupLocation = groupId => {
+  const uri = `${groupr_api_url}/groups/${groupId}/actions/post`;
   return makeRequest({
-    uri: `${groupr_api_url}/groups/${groupId}/actions/post`,
+    uri,
     method: 'POST',
     auth: {
       bearer: groupr_api_auth_token,
@@ -70,16 +78,12 @@ getGroups().then(response => {
       console.log('It is the day after group. Updating the next group date and next location');
       console.log(`Group ${groupId}`);
       updateNextDate(groupId).then(() => {
-        return updateNextLocation(groupId)
-      }, error => {
-        console.log(error);
+        return updateNextLocation(groupId);
       });
     } else if (is4DaysBeforeNextGroup) {
       console.log('Now posting next group location to social media channels');
       console.log(`Group ${groupId}`);
-      postGroupLocation(groupId).catch(error => {
-        console.log(error);
-      });
+      postGroupLocation(groupId);
     }
   });
 });
