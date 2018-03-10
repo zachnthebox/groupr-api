@@ -70,7 +70,7 @@ getGroups().then(response => {
       console.log('It is the day after group. Updating the next group date and next location');
       console.log(`Group ${groupId}`);
       updateNextDate(groupId).then(() => {
-        updateNextLocation(groupId)
+        return updateNextLocation(groupId)
       }, error => {
         console.log(error);
       });
