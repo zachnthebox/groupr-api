@@ -30,7 +30,7 @@ const getGroups = () => {
 
 const updateNextDate = groupId => {
   return makeRequest({
-    uri: `${groupr_api_url}/groups/${groupId}/actions/skipDate`,
+    uri: `${groupr_api_url}/groups/${groupId}/actions/skip-date`,
     method: 'POST',
     auth: {
       bearer: groupr_api_auth_token,
@@ -40,7 +40,7 @@ const updateNextDate = groupId => {
 
 const updateNextLocation = groupId => {
   return makeRequest({
-    uri: `${groupr_api_url}/groups/${groupId}/actions/skipLocation`,
+    uri: `${groupr_api_url}/groups/${groupId}/actions/skip-location`,
     method: 'POST',
     auth: {
       bearer: groupr_api_auth_token,
