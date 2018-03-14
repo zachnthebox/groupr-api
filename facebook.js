@@ -3,13 +3,16 @@ const FB = require('fb');
 const group_id = process.env.facebook_group_id;
 const access_token = process.env.facebook_access_token;
 
+FB.options({
+  version: 'v2.6',
+});
 FB.setAccessToken(access_token);
 
 function postToGroup(message, link) {
   FB.api(`/${group_id}/feed`, 'POST', {
     message,
     link,
-  }, function (res) {
+  }, function(res) {
     if (!res) {
       throw false;
     } else if (res.error) {
